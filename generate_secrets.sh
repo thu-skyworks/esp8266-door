@@ -1,5 +1,5 @@
 #!/bin/bash
-cat >src/secrets.h <<<EOF
+cat >src/secrets.h <<EOF
 #pragma once
 
 const char *ssid = "$PRJ_CFG_SSID";   // WiFi SSID
