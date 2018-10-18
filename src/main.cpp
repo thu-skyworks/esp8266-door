@@ -21,9 +21,9 @@ const char *openDoor = "open";
 const char *subTopic = "/command";
 
 void door_open() {
-  digitalWrite(0, LOW);
-  delay(1000);
   digitalWrite(0, HIGH);
+  delay(500);
+  digitalWrite(0, LOW);
 }
 
 void setup_wifi() {
@@ -89,6 +89,8 @@ void reconnect() {
 
 void setup() {
   pinMode(0, OUTPUT);
+  pinMode(2, OUTPUT);
+  digitalWrite(2, LOW); // REn=0, Receiver Output Enable. 
   digitalWrite(0, HIGH);
   Serial.begin(9600);
   // Serial.setTimeout(300);
@@ -109,7 +111,6 @@ void printSerial() {
 }
 
 void loop() {
-  char tmp;
   unsigned long cardid;
 
   if (!client.connected()) {
