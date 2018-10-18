@@ -1,66 +1,15 @@
-# Continuous Integration (CI) is the practice, in software
-# engineering, of merging all developer working copies with a shared mainline
-# several times a day < http://docs.platformio.org/page/ci/index.html >
-#
-# Documentation:
-#
-# * Travis CI Embedded Builds with PlatformIO
-#   < https://docs.travis-ci.com/user/integration/platformio/ >
-#
-# * PlatformIO integration with Travis CI
-#   < http://docs.platformio.org/page/ci/travis.html >
-#
-# * User Guide for `platformio ci` command
-#   < http://docs.platformio.org/page/userguide/cmd_ci.html >
-#
-#
-# Please choice one of the following templates (proposed below) and uncomment
-# it (remove "# " before each line) or use own configuration according to the
-# Travis CI documentation (see above).
-#
-
-
-#
-# Template #1: General project. Test it using existing `platformio.ini`.
-#
-
 language: python
 python:
-    - "2.7"
-
+- '2.7'
 sudo: false
 cache:
-    directories:
-        - "~/.platformio"
-
+  directories:
+  - "~/.platformio"
 install:
-    - pip install -U platformio
-
+- pip install -U platformio
 script:
-    - ./generate_secrets.sh
-    - platformio run
-
-
-#
-# Template #2: The project is intended to by used as a library with examples
-#
-
-# language: python
-# python:
-#     - "2.7"
-#
-# sudo: false
-# cache:
-#     directories:
-#         - "~/.platformio"
-#
-# env:
-#     - PLATFORMIO_CI_SRC=path/to/test/file.c
-#     - PLATFORMIO_CI_SRC=examples/file.ino
-#     - PLATFORMIO_CI_SRC=path/to/test/directory
-#
-# install:
-#     - pip install -U platformio
-#
-# script:
-#     - platformio ci --lib="." --board=ID_1 --board=ID_2 --board=ID_N
+- "./generate_secrets.sh"
+- platformio run
+env:
+  global:
+    secure: RRO6VkI3+w4mgLjQGdC7wTagNAcEaRr9G095u5aFKp6OJeNIr3wL9bD2E/WiJ25/tldktl+4G41WPhRTbVWiuIAZlagY/7iHXlmCxTNFJC7wYGudNWWiCAsVU2ERoO98lRTn9Z4+KMlx0s1KalSP7a6PWjKfv7gjR8plaL86VEjJ6ZoJ75YQ4al8CBiDnTDNUKZXQfHPZs6Rl4DSSZ4DvZXsweqlN4g15+SbR9vsiPslQ6sIFdV/jmTZwwiv7YuoqZzd3+kdugkP+zxwL6t15rHnuC7T8NYX0mUSSopAhyiCAhwc/DHcPaOvKqeJtp9z5wLa4UNC7SfjnkY5NAITRMv70kmHMOC/TDxs9KhLzIfqUuDe5DZGi7aUjPebgMBhTchczZCI7Dn1gkYfyVRQdyToa2xvI4X1kU+WuUX9D79Hr08n/lKIIo34+ZSU0UsEg2K8SkkCRGpWZOs2G/I/rozkS3ykNxuNvsuTFAMNisR6yOsF52DATEHOx2MORHxct4Lg1DvkIIpqxFpIqIj8vvXO7fV74JVHkKCAoIFWvMUqx29w6qDawjPRkQNQgbszUwAflAOTW/0ejPth0YKGXFO5Pl9MJoUzofAdkBvcMPFr/OJUxS/rED+693xoU5pwEpQwy0hdN13D7T0+ET2l3jUsiLkk/GVTcX8vCm6YR74=
