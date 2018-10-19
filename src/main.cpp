@@ -11,6 +11,7 @@
 #include "secrets.h"
 
 char buf[32];
+unsigned short payloadLength, curByte = 0;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -102,7 +103,7 @@ void setup() {
 
 void printSerial() {
     String msg = "[rs485] Recv: ";
-    for (int i = 0; i < (int)sizeof(buf); i++) {
+    for (int i = 0; i < curByte; i++) {
       msg += String(buf[i], HEX);
       msg += " ";
       // buf[i] = 0x00;
@@ -112,7 +113,9 @@ void printSerial() {
 
 void parseBuf() {
     unsigned long cardid;
+#ifdef __DEBUG__
     printSerial();
+#endif
     if (buf[0] == 0x02) {
       if ((buf[1] == 0x01) && (buf[2] == 0x0F)) {
         cardid = (buf[9] << 24) + (buf[10] << 16) + (buf[11] << 8) + buf[12];
@@ -127,7 +130,6 @@ void parseBuf() {
 }
 
 void loop() {
-  static unsigned short recvLength, curByte = 0;
 
   if (!client.connected()) {
     reconnect();
@@ -146,11 +148,11 @@ void loop() {
         }
         break;
       case 3: // Len
-        recvLength = buf[2];
+        payloadLength = buf[2];
         break;
       default:
-        if(curByte>3 && curByte == recvLength+5){
-          if(curByte < sizeof(buf) && buf[curByte] == 3) // Frame End Tag
+        if(/*curByte>3 && */curByte == payloadLength+5){
+          if(curByte <= sizeof(buf) && buf[curByte-1] == 3) // Frame End Tag
             parseBuf();
           curByte = 0;
         }
