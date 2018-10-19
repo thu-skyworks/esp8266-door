@@ -10,7 +10,7 @@
 
 #include "secrets.h"
 
-char buf[50];
+char buf[32];
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -91,9 +91,9 @@ void setup() {
   pinMode(0, OUTPUT);
   pinMode(2, OUTPUT);
   digitalWrite(2, LOW); // REn=0, Receiver Output Enable. 
-  digitalWrite(0, HIGH);
+  digitalWrite(0, LOW);
   Serial.begin(9600);
-  // Serial.setTimeout(300);
+  // Serial.setTimeout(50);
 
   setup_wifi();
   client.setServer(mqtt_broker, 1883);
@@ -102,7 +102,7 @@ void setup() {
 
 void printSerial() {
     String msg = "[rs485] Recv: ";
-    for (int i = 0; i < 30; i++) {
+    for (int i = 0; i < (int)sizeof(buf); i++) {
       msg += String(buf[i], HEX);
       msg += " ";
       // buf[i] = 0x00;
@@ -110,19 +110,9 @@ void printSerial() {
     client.publish("/log", msg.c_str());
 }
 
-void loop() {
-  unsigned long cardid;
-
-  if (!client.connected()) {
-    reconnect();
-  }
-  client.loop();
-
-  if (Serial.available()) {
-    // tmp = Serial.read();
-    Serial.readBytes(buf, 50);
+void parseBuf() {
+    unsigned long cardid;
     printSerial();
-
     if (buf[0] == 0x02) {
       if ((buf[1] == 0x01) && (buf[2] == 0x0F)) {
         cardid = (buf[9] << 24) + (buf[10] << 16) + (buf[11] << 8) + buf[12];
@@ -133,6 +123,38 @@ void loop() {
 #endif
       }
     }
-    for(int i = 0; i < 50; i++) buf[i] = 0x00;
+    for(int i = 0; i < (int)sizeof(buf); i++) buf[i] = 0x00;
+}
+
+void loop() {
+  static unsigned short recvLength, curByte = 0;
+
+  if (!client.connected()) {
+    reconnect();
+  }
+  client.loop();
+
+  if (Serial.available()) {
+    byte r = Serial.read();
+    if(curByte < sizeof(buf))
+      buf[curByte] = r;
+    curByte++;
+    switch(curByte){
+      case 1:
+        if(buf[0] != 2){ // Frame Start Tag
+          curByte = 0;
+        }
+        break;
+      case 3: // Len
+        recvLength = buf[2];
+        break;
+      default:
+        if(curByte>3 && curByte == recvLength+5){
+          if(curByte < sizeof(buf) && buf[curByte] == 3) // Frame End Tag
+            parseBuf();
+          curByte = 0;
+        }
+    }
+
   }
 }
