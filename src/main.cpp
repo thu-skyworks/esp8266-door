@@ -102,20 +102,18 @@ void setup() {
 }
 
 void printSerial() {
-    String msg = "[rs485] Recv: ";
+    String msg = "";
     for (int i = 0; i < curByte; i++) {
       msg += String(buf[i], HEX);
       msg += " ";
       // buf[i] = 0x00;
     }
-    client.publish("/log", msg.c_str());
+    client.publish("/rs485", msg.c_str());
 }
 
 void parseBuf() {
     unsigned long cardid;
-#ifdef __DEBUG__
     printSerial();
-#endif
     if (buf[0] == 0x02) {
       if ((buf[1] == 0x01) && (buf[2] == 0x0F)) {
         cardid = (buf[9] << 24) + (buf[10] << 16) + (buf[11] << 8) + buf[12];
