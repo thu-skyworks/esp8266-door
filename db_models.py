@@ -9,17 +9,17 @@ class BaseModel(Model):
         database = mysql_db
 
 class AccountInfo(BaseModel):
-    realname = CharField()
-    studnum = CharField(unique=True)
-    cardnum = CharField(index=True,unique=True)
+    realname = CharField(max_length=30)
+    studnum = CharField(max_length=12,unique=True)
+    cardnum = CharField(max_length=10,index=True,unique=True)
     cardtype= IntegerField()
-    userid  = CharField()
+    userid  = CharField(max_length=20)
 
 
 class AccessRecords(BaseModel):
-    realname = CharField(default='')
-    studnum = CharField(default='')
-    cardnum = CharField(default='')
+    realname = CharField(max_length=30,default='')
+    studnum = CharField(max_length=12,default='')
+    cardnum = CharField(max_length=10,default='')
     status = IntegerField()
     created = DateTimeField(index=True, default=datetime.datetime.now)
 
