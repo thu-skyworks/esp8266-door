@@ -44,7 +44,7 @@ def verify_with_ldap(studnum):
             cnt += 1
         else:
             if cnt>1:
-                print("Warning: more than one users matched {}".format(studnum))
+                print("Warning: more than one user matched {}".format(studnum))
             if cnt>0:
                 passed = True
                 status = AuthStatus.SUCCESS
