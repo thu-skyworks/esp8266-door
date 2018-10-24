@@ -11,7 +11,10 @@ class AuthStatus:
     NO_LDAP_ENTRY = -2
     NO_SUCH_USER  = -3
     ACCESS_DEINED = -4
+    USER_DISABLED = -5
     EXCEPTION     = -1000
+
+ADS_UF_ACCOUNTDISABLE=2 #https://docs.microsoft.com/en-us/windows/desktop/adschema/a-useraccountcontrol
 
 client=mqtt.Client()
 
@@ -23,23 +26,36 @@ def verify_with_ldap(studnum):
     conn.set_option(ldap.OPT_REFERRALS, 0)
     try:
         bind_result = conn.simple_bind_s(config.LDAP_USER, config.LDAP_PASS)
+        # print("LDAP: Succesfully authenticated")
         search_results = conn.search_s(
                 'DC=ad,DC=thu-skyworks,DC=org',
                 ldap.SCOPE_SUBTREE,
-                "cn=*",
+                "(&(objectClass=person)(employeeNumber={}))".format(studnum),
             )
-        print("LDAP: Succesfully authenticated")
-        passed = True
-        status = AuthStatus.SUCCESS
+        search_results = filter(lambda s: s[0] is not None, search_results)
+        cnt = 0;
+        for dn,details in search_results:
+            # print(details)
+            if 'userAccountControl' in details: # MS AD
+                print("userAccountControl =",int(details['userAccountControl'][0]))
+                if int(details['userAccountControl'][0]) & ADS_UF_ACCOUNTDISABLE:
+                    status = AuthStatus.USER_DISABLED
+                    break
+            cnt += 1
+        else:
+            if cnt>1:
+                print("Warning: more than one users matched {}".format(studnum))
+            if cnt>0:
+                passed = True
+                status = AuthStatus.SUCCESS
+            else:
+                status = AuthStatus.NO_SUCH_USER
     except ldap.INVALID_CREDENTIALS:
         print("LDAP: Invalid credentials")
     except ldap.SERVER_DOWN:
         print("LDAP: Server down")
     except ldap.LDAPError as e:
-        if type(e.message) == dict and e.message.has_key('desc'):
-            print("LDAP: Other LDAP error: " + e.message['desc'])
-        else: 
-            print("LDAP: Other LDAP error: " + e)
+        print("LDAP: Other LDAP error: ", e)
     finally:
         conn.unbind_s()
     return passed, status
@@ -54,6 +70,7 @@ def verify_card(msg):
         one = AccountInfo.select().where(AccountInfo.cardnum == card_number).get()
 
         print("Access Request by", one.studnum, one.realname)
+        assert len(one.studnum) > 0 and int(one.studnum) > 0
 
         success, status = verify_with_ldap(one.studnum)
         if success:
