@@ -24,6 +24,7 @@ def verify_with_ldap(studnum):
     conn = ldap.initialize(config.LDAP_URI)
     conn.protocol_version = 3
     conn.set_option(ldap.OPT_REFERRALS, 0)
+    conn.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
     try:
         bind_result = conn.simple_bind_s(config.LDAP_USER, config.LDAP_PASS)
         # print("LDAP: Succesfully authenticated")
@@ -101,7 +102,10 @@ def verify_card(msg):
         raise e
 
 
-topics = {"/log": log_handle, "/rs485": log_handle, "/cardverify": verify_card}
+topics = {
+    "/log": log_handle,
+    #"/rs485": log_handle,
+    "/cardverify": verify_card}
 
 def on_connect(client, userdata, flags, rc):
     print("Connected to MQTT broker with result code " + str(rc))
@@ -112,7 +116,8 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     # print("Received message " + str(msg.payload) + " from topic " + msg.topic)
     try:
-        topics.get(msg.topic)(msg)
+        if msg.topic in topics:
+            topics.get(msg.topic)(msg)
     except Exception as e:
         traceback.print_exc()
 
