@@ -65,6 +65,7 @@ def log_handle(msg):
     print("[client]" + str(msg.payload))
 
 def verify_card(msg):
+    DB_connection_check()
     card_number = '{:010d}'.format(int(msg.payload))
     status = AuthStatus.EXCEPTION
     try:

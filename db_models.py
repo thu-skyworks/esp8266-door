@@ -26,11 +26,7 @@ class AccessRecords(BaseModel):
 def DB_Init():
     mysql_db.connect() #连接数据库
     mysql_db.create_tables([AccountInfo, AccessRecords], safe=True)
-    # AccountInfo.create(
-    #             realname = 'good one',
-    #             studnum  = '2017011234',
-    #             cardnum  = '0000080801',
-    #             cardtype = 2,
-    #             userid = 'test',
-    #             ).save()
+
+def DB_connection_check():
+    mysql_db.get_conn().ping(True)
 
