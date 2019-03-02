@@ -22,9 +22,9 @@ const char *openDoor = "open";
 const char *subTopic = "/command";
 
 void door_open() {
-  digitalWrite(0, HIGH);
-  delay(500);
   digitalWrite(0, LOW);
+  delay(5000);
+  digitalWrite(0, HIGH);
 }
 
 void setup_wifi() {
@@ -92,7 +92,7 @@ void setup() {
   pinMode(0, OUTPUT);
   pinMode(2, OUTPUT);
   digitalWrite(2, LOW); // REn=0, Receiver Output Enable. 
-  digitalWrite(0, LOW);
+  digitalWrite(0, HIGH);
   Serial.begin(9600);
   // Serial.setTimeout(50);
 
