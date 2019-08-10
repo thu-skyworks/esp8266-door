@@ -113,7 +113,7 @@ void printSerial() {
 
 void parseBuf() {
     unsigned long cardid;
-    printSerial();
+    // printSerial();
     if (buf[0] == 0x02) {
       if ((buf[1] == 0x01) && (buf[2] == 0x0F)) {
         cardid = (buf[9] << 24) + (buf[10] << 16) + (buf[11] << 8) + buf[12];
