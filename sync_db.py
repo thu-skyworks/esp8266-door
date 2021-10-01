@@ -9,26 +9,26 @@ DB_Init()
 
 class TempAccountInfo(AccountInfo):
     class Meta:
-        db_table = 'temp_accout_info'
+        table_name = 'temp_accout_info'
 
-tmp_tbl = TempAccountInfo._meta.db_table
-acct_tbl = AccountInfo._meta.db_table
+tmp_tbl = TempAccountInfo._meta.table_name
+acct_tbl = AccountInfo._meta.table_name
 
 mysql_db.execute_sql('CREATE TEMPORARY TABLE {} SELECT * FROM {} LIMIT 0'.format(tmp_tbl,acct_tbl))
 
-# Connect to MSSQL Server 
-conn = pymssql.connect(server=config.UPSTREAM_DB_SERVER, 
-                       user=config.UPSTREAM_DB_U, 
-                       password=config.UPSTREAM_DB_P, 
-                       database=config.UPSTREAM_DB_NAME) 
- 
-# Create a database cursor 
-cursor = conn.cursor() 
- 
-# Replace this nonsense with your own query :) 
+# Connect to MSSQL Server
+conn = pymssql.connect(server=config.UPSTREAM_DB_SERVER,
+                       user=config.UPSTREAM_DB_U,
+                       password=config.UPSTREAM_DB_P,
+                       database=config.UPSTREAM_DB_NAME)
+
+# Create a database cursor
+cursor = conn.cursor()
+
+# Replace this nonsense with your own query :)
 query = config.UPSTREAM_DB_SQL
- 
-# Execute the query 
+
+# Execute the query
 cursor.execute(query)
 
 data_source=[]
@@ -42,8 +42,8 @@ for row in cursor:
             'userid':    row[4],
             })
 
-# Close the cursor and the database connection 
-cursor.close() 
+# Close the cursor and the database connection
+cursor.close()
 conn.close()
 
 print("%d records in total" %(len(data_source)))
@@ -51,9 +51,9 @@ print("%d records in total" %(len(data_source)))
 with mysql_db.atomic():
     TempAccountInfo.insert_many(data_source).execute()
 
-print("%d records in temp table" %(SelectQuery(TempAccountInfo).count()))
+print("%d records in temp table" %(TempAccountInfo.select().count()))
 
-cursor = mysql_db.get_cursor()
+cursor = mysql_db.cursor()
 cursor.execute('UPDATE {0} INNER JOIN {1} ON {0}.studnum = {1}.studnum SET {0}.cardnum = {1}.cardnum WHERE {0}.cardnum != {1}.cardnum'.format(acct_tbl,tmp_tbl))
 print("%d records updated" % (mysql_db.rows_affected(cursor)))
 cursor.execute('INSERT IGNORE INTO {0} SELECT * FROM {1}'.format(acct_tbl,tmp_tbl))
